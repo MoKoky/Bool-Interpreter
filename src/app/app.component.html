@@ -1,2 +1,13 @@
-<h1>{{title}}</h1>
-<h2>{{calc}}</h2>
+
+<button mat-raised-button color="primary" (click)="Add()">Primary</button>
+  <mat-form-field class="example-full-width">
+    <mat-label>Favorite food</mat-label>
+    <input matInput [formControl]="xFormControl">
+  </mat-form-field>
+
+  <mat-form-field class="example-full-width">
+    <mat-label>Favorite food</mat-label>
+    <input matInput [formControl]="yFormControl">
+  </mat-form-field>
+
+<mat-label>{{sum}}</mat-label>
