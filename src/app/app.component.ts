@@ -8,20 +8,15 @@ import {FormControl, Validators} from '@angular/forms';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Bool-Interpreter';
-  sum = 0;
 
-  xFormControl = new FormControl('', [
-    Validators.required
-  ]);
-  yFormControl = new FormControl('', [
+  formControl = new FormControl('', [
     Validators.required
   ]);
 
   constructor(private interpreterService: InterpreterService) {
   }
 
-  public Add(): void{
-    this.sum = this.interpreterService.Add(Number(this.xFormControl.value), Number(this.yFormControl.value));
+  calculate(): void{
+    this.interpreterService.calculate(this.formControl.value);
   }
 }
