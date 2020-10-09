@@ -1,6 +1,6 @@
-# BoolInterpreterng
- 
-build --prod --base-href "https://mokoky.github.io/Bool-Interpreter/"
+# BoolInterpreter
+
+ng build --prod --base-href "https://mokoky.github.io/Bool-Interpreter/"
 
 npx angular-cli-ghpages --dir=dist/Bool-Interpreter
 
