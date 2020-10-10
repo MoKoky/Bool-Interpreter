@@ -11,6 +11,11 @@ import {
 } from './OperatorClasses';
 import { Injectable } from '@angular/core';
 
+export interface TreeFormula{
+  tree: Operator;
+  map: Map<string, Variable>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,7 +35,7 @@ export class InterpreterService {
 
   constructor() { }
 
-  public calculate(formula: string): any {
+  public calculate(formula: string): TreeFormula {
      formula =  this.priorityOperators(formula);
      console.log('Applied priority: ' + formula);
      formula = this.removeDoubleBrackets(formula);
@@ -40,7 +45,7 @@ export class InterpreterService {
      return formulaTree;
   }
 
-  private buildTree(formula: string): any {
+  private buildTree(formula: string): TreeFormula {
     const variableMap = this.collectVariables(formula);
     return {
       tree: this.buildTreeRecursive(formula, variableMap),
