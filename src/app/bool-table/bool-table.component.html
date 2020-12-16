@@ -4,6 +4,18 @@
 </mat-form-field>
 
 <button mat-raised-button color="primary" (click)="calculate()">Calculate</button>
+&nbsp;&nbsp;&nbsp;
+<button mat-raised-button color="primary" (click)="printKV()">KV</button>
+<button mat-stroked-button color="basic" (click)="updateInput('⊼')">⊼</button>
+<button mat-stroked-button color="basic" (click)="updateInput('∧')">∧</button>
+<button mat-stroked-button color="basic" (click)="updateInput('⊽')">⊽</button>
+<button mat-stroked-button color="basic" (click)="updateInput('∨')">∨</button>
+<button mat-stroked-button color="basic" (click)="updateInput('⊻')">⊻</button>
+<button mat-stroked-button color="basic" (click)="updateInput('→')">→</button>
+<button mat-stroked-button color="basic" (click)="updateInput('←')">←</button>
+<button mat-stroked-button color="basic" (click)="updateInput('↔')">↔</button>
+<button mat-stroked-button color="basic" (click)="updateInput('¬')">¬</button>
+
 
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
   <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
@@ -14,3 +26,16 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+
+
+<mat-grid-list cols="2" rowHeight="100px">
+  <mat-grid-tile
+    *ngFor="let tile of tiles"
+    [colspan]="tile.cols"
+    [rowspan]="tile.rows"
+    [style.background]="tile.color">
+    {{tile.text}}
+    <mat-label>Enter formula</mat-label>
+  </mat-grid-tile>
+</mat-grid-list>
+
