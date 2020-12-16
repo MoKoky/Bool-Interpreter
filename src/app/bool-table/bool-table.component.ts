@@ -2,6 +2,13 @@ import { Component } from '@angular/core';
 import {InterpreterService} from '../interpreter.service';
 import {FormControl, Validators} from '@angular/forms';
 
+export interface Tile {
+  color: string;
+  cols: number;
+  rows: number;
+  text: string;
+}
+
 @Component({
   selector: 'app-bool-table',
   templateUrl: './bool-table.component.html',
@@ -15,12 +22,13 @@ export class BoolTableComponent {
 
   displayedColumns: string[] = [];
   dataSource = [];
+  tiles: Tile[] = [];
 
   constructor(private interpreterService: InterpreterService) {
   }
 
   // Calculate formula and display table
-  calculate(): void{
+  calculate():  any {
     // Get Formula tree
     const formula = this.interpreterService.calculate(this.formControl.value);
     const map = formula.map;
@@ -69,6 +77,63 @@ export class BoolTableComponent {
     // Set the labels of the table
     keys.push(this.formControl.value);
     this.displayedColumns = keys;
+
+
+
+    return possibilityList;
+  }
+
+  /*
+  Add selected symbol to the input field (behind the last character)
+   */
+  updateInput(symbol): void {
+
+    let currentInput = this.formControl.value;
+    currentInput = currentInput + symbol;
+    this.formControl.setValue(currentInput);
+  }
+
+
+  printKV(): void {
+    //get formula tree
+    const possibilityList = this.calculate();
+    let numFields = possibilityList.length;
+    if (numFields == 4) {
+
+      for (let i = 0; i < numFields; i++) {
+        let color;
+        //set color for current tile
+        if(possibilityList[i][this.formControl.value] == 1) {
+          //green
+          color = '#4CAF50';
+        }
+        else {
+          //red
+          color = '#FF5252';
+        }
+
+        let fieldName = '';
+        //generate name for current tile
+        for (let j = 0; j < Math.sqrt(numFields); j ++) {
+          if (possibilityList[i][this.displayedColumns[j]] == 1) {
+            fieldName = fieldName + this.displayedColumns[j];
+          }
+          else {
+            fieldName = fieldName + '¬' + this.displayedColumns[j];
+          }
+        }
+        //create tiles
+        if (i < 2) {
+          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " + possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
+        }
+        else {
+          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " + possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
+        }
+
+      }
+    }
+
+
   }
 
 
