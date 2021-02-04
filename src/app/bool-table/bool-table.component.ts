@@ -18,7 +18,8 @@ export class BoolTableComponent {
 
   formControl = new FormControl('', [
     Validators.required,
-    this.forbiddenNameValidator()
+    this.forbiddenNameValidator(),
+    this.removeSpaces()
   ]);
 
   displayedColumns: string[] = [];
@@ -28,11 +29,25 @@ export class BoolTableComponent {
   constructor(private interpreterService: InterpreterService) {
   }
 
+  // check if the input formula is valid
   private forbiddenNameValidator(): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
       const correct = this.interpreterService.checkIfFormulaIsValid(control.value);
-      console.log(correct);
       return !correct ? {forbiddenName: {value: control.value}} : null;
+    };
+  }
+
+  // Remove spaces from the input
+  private removeSpaces(): ValidatorFn {
+    return (c: AbstractControl): {[key: string]: any} | null => {
+      if (c && c.value) {
+        const removedSpaces = c.value.split(' ').join('');
+        // This check is needed. Otherwise the validator will update every frame to remove whitespaces!!!
+        if (removedSpaces !== c.value){
+          c.setValue(removedSpaces, {emitEvent: false});
+        }
+      }
+      return null;
     };
   }
 
@@ -54,6 +69,13 @@ export class BoolTableComponent {
     const keys = Array.from(map.keys());
     // Save entries ofr the table here
     const possibilityList = [];
+
+    // check if the same key as the formula is already in the table, in that case add brackets around formula to
+    // prevent having the same key twice (causes error otherwise)
+    let formulaString = this.formControl.value;
+    if (keys.indexOf((formulaString)) > -1){
+      formulaString = '(' + formulaString + ')';
+    }
 
     // Calculate each possibility
     for (let i = 0; i < possibilities; i++){
@@ -78,9 +100,9 @@ export class BoolTableComponent {
       // Evaluate formula tree after all variables have been set for the current case
       // and save outcome for the formula
       if (tree.evaluate()){
-        entry[this.formControl.value] = '1';
+        entry[formulaString] = '1';
       } else {
-        entry[this.formControl.value] = '0';
+        entry[formulaString] = '0';
       }
       // add the current case to the list of all cases
       possibilityList.push(entry);
@@ -88,8 +110,9 @@ export class BoolTableComponent {
 
     // set the finished list to be displayed in the table
     this.dataSource = possibilityList;
+
     // Set the labels of the table
-    keys.push(this.formControl.value);
+    keys.push(formulaString);
     this.displayedColumns = keys;
 
     return possibilityList;
@@ -150,6 +173,7 @@ export class BoolTableComponent {
 
   }*/
 
+  // Return Error Messages for the formula input field
   public getErrorMessage(): string {
     if (this.formControl.hasError('requried')){
       return 'Please enter a formula';
