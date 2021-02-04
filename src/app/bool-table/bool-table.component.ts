@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {InterpreterService} from '../interpreter.service';
-import {FormControl, Validators} from '@angular/forms';
+import {AbstractControl, FormControl, ValidatorFn, Validators} from '@angular/forms';
 
 export interface Tile {
   color: string;
@@ -17,7 +17,8 @@ export interface Tile {
 export class BoolTableComponent {
 
   formControl = new FormControl('', [
-    Validators.required
+    Validators.required,
+    this.forbiddenNameValidator()
   ]);
 
   displayedColumns: string[] = [];
@@ -27,8 +28,21 @@ export class BoolTableComponent {
   constructor(private interpreterService: InterpreterService) {
   }
 
+  private forbiddenNameValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      const correct = this.interpreterService.checkIfFormulaIsValid(control.value);
+      console.log(correct);
+      return !correct ? {forbiddenName: {value: control.value}} : null;
+    };
+  }
+
   // Calculate formula and display table
-  calculate():  any {
+  calculate(): any {
+
+    if (this.formControl.invalid){
+      return;
+    }
+
     // Get Formula tree
     const formula = this.interpreterService.calculate(this.formControl.value);
     const map = formula.map;
@@ -136,4 +150,16 @@ export class BoolTableComponent {
 
   }*/
 
+  public getErrorMessage(): string {
+    if (this.formControl.hasError('requried')){
+      return 'Please enter a formula';
+    } else {
+      return 'Enter a correct formula';
+    }
+  }
+
 }
+
+
+
+

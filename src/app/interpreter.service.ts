@@ -35,6 +35,67 @@ export class InterpreterService {
 
   constructor() { }
 
+  public checkIfFormulaIsValid(formula: string): boolean{
+
+    // check if brackets are correct
+    let openClosedCount = 0;
+    for (let i = 0; i < formula.length; i++){
+      const char = formula.charAt(i);
+      if (char === this.openBracket){
+        openClosedCount = openClosedCount + 1;
+      } else if (char === this.closeBracket){
+        openClosedCount = openClosedCount - 1;
+      }
+      if (openClosedCount < 0){
+        return false;
+      }
+    }
+    if (openClosedCount !== 0) {
+      return false;
+    }
+
+    // check if all other symbols are in correct order
+    let lastChar = -1;
+
+    for (let i = 0; i < formula.length; i++){
+      const char = formula.charAt(i);
+      if (char === this.openBracket){
+
+        if (lastChar === LastChar.Variable || lastChar === LastChar.ClosedBracket){
+          return false;
+        }
+        lastChar = LastChar.OpenBracket;
+
+      } else if (char === this.closeBracket){
+
+        if (lastChar === LastChar.Operator || lastChar === LastChar.OpenBracket){
+          return false;
+        }
+        lastChar = LastChar.ClosedBracket;
+
+      } else if (this.operatorPriorityList.indexOf(char) > -1){
+
+        if (lastChar === LastChar.Operator){
+          return false;
+        }
+        lastChar = LastChar.Operator;
+
+      } else if (char.match(this.variableRegex)){
+
+        if (lastChar === LastChar.Variable){
+          return false;
+        }
+        lastChar = LastChar.Variable;
+
+      } else {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+
   public calculate(formula: string): TreeFormula {
      formula =  this.priorityOperators(formula);
      console.log('Applied priority: ' + formula);
@@ -259,4 +320,11 @@ export class InterpreterService {
 
     return formula;
   }
+}
+
+enum LastChar{
+  OpenBracket,
+  ClosedBracket,
+  Variable,
+  Operator
 }
