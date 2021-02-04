@@ -78,8 +78,6 @@ export class BoolTableComponent {
     keys.push(this.formControl.value);
     this.displayedColumns = keys;
 
-
-
     return possibilityList;
   }
 
@@ -94,7 +92,7 @@ export class BoolTableComponent {
   }
 
 
-  printKV(): void {
+  /*printKV(): void {
     //get formula tree
     const possibilityList = this.calculate();
     let numFields = possibilityList.length;
@@ -124,18 +122,18 @@ export class BoolTableComponent {
         }
         //create tiles
         if (i < 2) {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " + possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
+          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
+          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
         }
         else {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " + possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
+          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
+          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
         }
 
       }
     }
 
 
-  }
-
-
+  }*/
 
 }

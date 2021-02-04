@@ -8,13 +8,16 @@ import {MatTableModule} from '@angular/material/table';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatTabsModule} from '@angular/material/tabs';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatGridListModule} from '@angular/material/grid-list';
+import { TabComponent } from './tab/tab.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    BoolTableComponent
+    BoolTableComponent,
+    TabComponent
   ],
     imports: [
         BrowserModule,
@@ -24,7 +27,8 @@ import {MatGridListModule} from '@angular/material/grid-list';
         MatFormFieldModule,
         MatInputModule,
         ReactiveFormsModule,
-        MatGridListModule
+        MatGridListModule,
+        MatTabsModule
     ],
   providers: [],
   bootstrap: [AppComponent]
