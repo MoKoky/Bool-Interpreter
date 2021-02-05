@@ -11,13 +11,14 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatTabsModule} from '@angular/material/tabs';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatGridListModule} from '@angular/material/grid-list';
-import { TabComponent } from './tab/tab.component';
+import { NormalformComponent } from './normalform/normalform.component';
+import {MatCardModule} from '@angular/material/card';
 
 @NgModule({
   declarations: [
     AppComponent,
     BoolTableComponent,
-    TabComponent
+    NormalformComponent
   ],
     imports: [
         BrowserModule,
@@ -28,7 +29,8 @@ import { TabComponent } from './tab/tab.component';
         MatInputModule,
         ReactiveFormsModule,
         MatGridListModule,
-        MatTabsModule
+        MatTabsModule,
+        MatCardModule
     ],
   providers: [],
   bootstrap: [AppComponent]
