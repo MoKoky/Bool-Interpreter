@@ -10,10 +10,18 @@ import {
   XOROperator
 } from './OperatorClasses';
 import { Injectable } from '@angular/core';
+import {Subject} from 'rxjs';
 
 export interface TreeFormula{
   tree: Operator;
   map: Map<string, Variable>;
+}
+
+export interface EvaluatedFormula{
+  possibilityList: any[];
+  keys: string[];
+  formulaString: string;
+
 }
 
 @Injectable({
@@ -21,29 +29,180 @@ export interface TreeFormula{
 })
 export class InterpreterService {
 
-  notOperator = '¬';
-  openBracket = '(';
-  closeBracket = ')';
-  operatorPriorityList = ['⊼', '∧', '⊽', '∨', '⊻', '→', '←', '↔'];
-  variableRegex = '[A-Za-z]';
+  private formulaChangedEmitter = new Subject<void>();
+
+  private notOperator = '¬';
+  private openBracket = '(';
+  private closeBracket = ')';
+  private operatorPriorityList = ['⊼', '∧', '⊽', '∨', '⊻', '→', '←', '↔'];
+  private variableRegex = '[A-Za-z]';
 
   // Restricts the amount of loops (to prevent possible endless iterations)
-  maxLoop = 1000;
+  private maxLoop = 1000;
+
+  private formulaTree: TreeFormula;
+  private formulaString = '';
+  private possibilityList;
+  private keys;
+
+  private dnf;
+  private knf;
 
   // Test formula
   // a∧b∨¬c↔(a∨b)∧¬c
 
   constructor() { }
 
-  public calculate(formula: string): TreeFormula {
-     formula =  this.priorityOperators(formula);
-     console.log('Applied priority: ' + formula);
-     formula = this.removeDoubleBrackets(formula);
-     console.log('Removed double brackets: ' + formula);
-     const formulaTree = this.buildTree(formula);
-     console.log(formulaTree);
-     return formulaTree;
+  public getFormulaChangedEmitter(): Subject<void>{
+    return this.formulaChangedEmitter;
   }
+
+  public getDnf(): string{
+    return this.dnf;
+  }
+
+  public getKnf(): string{
+    return this.knf;
+  }
+
+  public calculate(formula: string): any {
+    this.formulaString = formula;
+    formula =  this.priorityOperators(formula);
+    console.log('Applied priority: ' + formula);
+    formula = this.removeDoubleBrackets(formula);
+    console.log('Removed double brackets: ' + formula);
+    const formulaTree = this.buildTree(formula);
+    console.log(formulaTree);
+    this.formulaTree = formulaTree;
+    this.evaluateFormula();
+
+    this.calculateNormalforms();
+
+    this.formulaChangedEmitter.next();
+  }
+
+  public checkIfFormulaIsValid(formula: string): boolean{
+
+    // check if brackets are correct
+    let openClosedCount = 0;
+    for (let i = 0; i < formula.length; i++){
+      const char = formula.charAt(i);
+      if (char === this.openBracket){
+        openClosedCount = openClosedCount + 1;
+      } else if (char === this.closeBracket){
+        openClosedCount = openClosedCount - 1;
+      }
+      if (openClosedCount < 0){
+        return false;
+      }
+    }
+    if (openClosedCount !== 0) {
+      return false;
+    }
+
+    // check if all other symbols are in correct order
+    let lastChar = -1;
+
+    for (let i = 0; i < formula.length; i++){
+      const char = formula.charAt(i);
+      if (char === this.openBracket){
+
+        if (lastChar === LastChar.Variable || lastChar === LastChar.ClosedBracket){
+          return false;
+        }
+        lastChar = LastChar.OpenBracket;
+
+      } else if (char === this.closeBracket){
+
+        if (lastChar === LastChar.Operator || lastChar === LastChar.OpenBracket){
+          return false;
+        }
+        lastChar = LastChar.ClosedBracket;
+
+      } else if (this.operatorPriorityList.indexOf(char) > -1){
+
+        if (lastChar === LastChar.Operator){
+          return false;
+        }
+        lastChar = LastChar.Operator;
+
+      } else if (char.match(this.variableRegex)){
+
+        if (lastChar === LastChar.Variable){
+          return false;
+        }
+        lastChar = LastChar.Variable;
+
+      } else {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public getEvaluatedFormula(): EvaluatedFormula{
+    const keysCopy = [...this.keys];
+    const possibilityListCopy = [...this.possibilityList];
+    return {possibilityList: possibilityListCopy, keys: keysCopy, formulaString: this.formulaString};
+  }
+
+  private evaluateFormula(): any{
+    const map = this.formulaTree.map;
+    const tree = this.formulaTree.tree;
+
+    // get number of possibilities that are possible with the amount of variables
+    const possibilities = Math.pow(2, map.size);
+    // Get list of all variables
+    const keys = Array.from(map.keys());
+    // Save entries ofr the table here
+    const possibilityList = [];
+
+    // check if the same key as the formula is already in the table, in that case add brackets around formula to
+    // prevent having the same key twice (causes error otherwise)
+    let formulaString = this.formulaString;
+    if (keys.indexOf((formulaString)) > -1){
+      formulaString = '(' + formulaString + ')';
+      this.formulaString = formulaString;
+    }
+
+    // Calculate each possibility
+    for (let i = 0; i < possibilities; i++){
+      // Save value to take away amounts for each bit
+      let value = i;
+      const entry = {};
+      // Go through each variable
+      for (let j = keys.length - 1; j >= 0; j--){
+        // Get value at position of variable and subtract it if it fits in the value
+        // By doing this we can determine if the variable is 0 or one in this case
+        const power = Math.pow(2, j);
+        if (value >= power){
+          value = value - power;
+          entry[keys[j]] = '1';
+          // Set value in variable map to influence tee
+          map.get(keys[j]).setValue(true);
+        } else {
+          entry[keys[j]] = '0';
+          map.get(keys[j]).setValue(false);
+        }
+      }
+      // Evaluate formula tree after all variables have been set for the current case
+      // and save outcome for the formula
+      if (tree.evaluate()){
+        entry[formulaString] = '1';
+      } else {
+        entry[formulaString] = '0';
+      }
+      // add the current case to the list of all cases
+      possibilityList.push(entry);
+    }
+
+    this.possibilityList = possibilityList;
+    this.keys = keys;
+  }
+
+
+
 
   private buildTree(formula: string): TreeFormula {
     const variableMap = this.collectVariables(formula);
@@ -259,4 +418,80 @@ export class InterpreterService {
 
     return formula;
   }
+
+
+  private calculateNormalforms(): any{
+    const minMaxTerms = this.calculateMinMaxTerm();
+
+    const minTerm = minMaxTerms.minTerms;
+    const maxTerm = minMaxTerms.maxTerms;
+
+    let dnf = '';
+    let knf = '';
+
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < minTerm.length; i++){
+      dnf += minTerm[i] + '∨';
+    }
+
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < maxTerm.length; i++){
+      knf += maxTerm[i] + '∧';
+    }
+
+    dnf = dnf.substr(0, dnf.length - 1);
+    knf = knf.substr(0, knf.length - 1);
+
+    this.knf = knf;
+    this.dnf = dnf;
+  }
+
+  private calculateMinMaxTerm(): {minTerms: any[], maxTerms: any[] }{
+
+    const minTerms = [];
+    const maxTerms = [];
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < this.possibilityList.length; i++){
+      const entry = this.possibilityList[i];
+      let term = '(';
+      if (entry[this.formulaString] === '1'){
+        // Minterm
+        // tslint:disable-next-line:prefer-for-of
+        for (let j = 0; j < this.keys.length; j++){
+          if (entry[this.keys[j]] === '0'){
+            term += '¬';
+          }
+          term += this.keys[j] + '∧';
+        }
+
+        term = term.substr(0, term.length - 1);
+        term += ')';
+        minTerms.push(term);
+
+      } else {
+        // Maxterm
+        // tslint:disable-next-line:prefer-for-of
+        for (let j = 0; j < this.keys.length; j++){
+          if (entry[this.keys[j]] === '1'){
+            term += '¬';
+          }
+          term += this.keys[j] + '∨';
+        }
+
+        term = term.substr(0, term.length - 1);
+        term += ')';
+        maxTerms.push(term);
+
+      }
+    }
+    return {minTerms, maxTerms};
+  }
+
+}
+
+enum LastChar{
+  OpenBracket,
+  ClosedBracket,
+  Variable,
+  Operator
 }

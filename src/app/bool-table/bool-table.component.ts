@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {InterpreterService} from '../interpreter.service';
-import {FormControl, Validators} from '@angular/forms';
+import {AbstractControl, FormControl, ValidatorFn, Validators} from '@angular/forms';
 
 export interface Tile {
   color: string;
@@ -17,84 +17,77 @@ export interface Tile {
 export class BoolTableComponent {
 
   formControl = new FormControl('', [
-    Validators.required
+    Validators.required,
+    this.forbiddenNameValidator(),
+    this.removeSpaces()
   ]);
 
   displayedColumns: string[] = [];
+  displayedColumnsAll: string[] = [];
   dataSource = [];
   tiles: Tile[] = [];
+  formulaString = '';
 
   constructor(private interpreterService: InterpreterService) {
   }
 
-  // Calculate formula and display table
-  calculate():  any {
-    // Get Formula tree
-    const formula = this.interpreterService.calculate(this.formControl.value);
-    const map = formula.map;
-    const tree = formula.tree;
+  // check if the input formula is valid
+  private forbiddenNameValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      const correct = this.interpreterService.checkIfFormulaIsValid(control.value);
+      return !correct ? {forbiddenName: {value: control.value}} : null;
+    };
+  }
 
-    // get number of possibilities that are possible with the amount of variables
-    const possibilities = Math.pow(2, map.size);
-    // Get list of all variables
-    const keys = Array.from(map.keys());
-    // Save entries ofr the table here
-    const possibilityList = [];
-
-    // Calculate each possibility
-    for (let i = 0; i < possibilities; i++){
-      // Save value to take away amounts for each bit
-      let value = i;
-      const entry = {};
-      // Go through each variable
-      for (let j = keys.length - 1; j >= 0; j--){
-        // Get value at position of variable and subtract it if it fits in the value
-        // By doing this we can determine if the variable is 0 or one in this case
-        const power = Math.pow(2, j);
-        if (value >= power){
-          value = value - power;
-          entry[keys[j]] = '1';
-          // Set value in variable map to influence tee
-          map.get(keys[j]).setValue(true);
-        } else {
-          entry[keys[j]] = '0';
-          map.get(keys[j]).setValue(false);
+  // Remove spaces from the input
+  private removeSpaces(): ValidatorFn {
+    return (c: AbstractControl): {[key: string]: any} | null => {
+      if (c && c.value) {
+        const removedSpaces = c.value.split(' ').join('');
+        // This check is needed. Otherwise the validator will update every frame to remove whitespaces!!!
+        if (removedSpaces !== c.value){
+          c.setValue(removedSpaces, {emitEvent: false});
         }
       }
-      // Evaluate formula tree after all variables have been set for the current case
-      // and save outcome for the formula
-      if (tree.evaluate()){
-        entry[this.formControl.value] = '1';
-      } else {
-        entry[this.formControl.value] = '0';
-      }
-      // add the current case to the list of all cases
-      possibilityList.push(entry);
+      return null;
+    };
+  }
+
+  // Calculate formula and display table
+  calculate(): any {
+
+    if (this.formControl.invalid){
+      return;
     }
 
-    // set the finished list to be displayed in the table
-    this.dataSource = possibilityList;
-    // Set the labels of the table
-    keys.push(this.formControl.value);
-    this.displayedColumns = keys;
+    // Get Formula tree
+    this.interpreterService.calculate(this.formControl.value);
+    const evaluatedFormula = this.interpreterService.getEvaluatedFormula();
 
+    this.dataSource = evaluatedFormula.possibilityList;
+    this.formulaString = evaluatedFormula.formulaString;
+    // evaluatedFormula.keys.push(evaluatedFormula.formulaString);
+    this.displayedColumns = evaluatedFormula.keys;
+    this.displayedColumnsAll = [...evaluatedFormula.keys];
+    this.displayedColumnsAll.unshift(this.formulaString);
 
+    console.log(this.dataSource);
+    console.log(this.formulaString);
+    console.log(this.displayedColumns);
 
-    return possibilityList;
   }
 
   /*
   Add selected symbol to the input field (behind the last character)
    */
   updateInput(symbol): void {
-
     let currentInput = this.formControl.value;
     currentInput = currentInput + symbol;
     this.formControl.setValue(currentInput);
   }
 
 
-  printKV(): void {
+  /*printKV(): void {
     //get formula tree
     const possibilityList = this.calculate();
     let numFields = possibilityList.length;
@@ -124,18 +117,31 @@ export class BoolTableComponent {
         }
         //create tiles
         if (i < 2) {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " + possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
+          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
+          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
         }
         else {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " + possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
+          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
+          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
         }
 
       }
     }
 
 
+  }*/
+
+  // Return Error Messages for the formula input field
+  public getErrorMessage(): string {
+    if (this.formControl.hasError('requried')){
+      return 'Please enter a formula';
+    } else {
+      return 'Enter a correct formula';
+    }
   }
 
-
-
 }
+
+
+
+
