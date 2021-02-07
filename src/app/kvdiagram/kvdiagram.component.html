@@ -1,8 +1,11 @@
 <mat-grid-list [cols]="columnCount" rowHeight="1:1">
-  <mat-grid-tile
+  <mat-grid-tile class="containerDiv"
     *ngFor="let tile of tiles"
     [style.background]="tile.color">
-    {{tile.text}}
+
+    <mat-label class="valueLabel">{{tile.value}}</mat-label>
+    <mat-label class="indexLabel">{{tile.index}}</mat-label>
+
     <mat-label></mat-label>
   </mat-grid-tile>
 </mat-grid-list>

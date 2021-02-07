@@ -2,13 +2,6 @@ import { Component } from '@angular/core';
 import {InterpreterService} from '../interpreter.service';
 import {AbstractControl, FormControl, ValidatorFn, Validators} from '@angular/forms';
 
-export interface Tile {
-  color: string;
-  cols: number;
-  rows: number;
-  text: string;
-}
-
 @Component({
   selector: 'app-bool-table',
   templateUrl: './bool-table.component.html',

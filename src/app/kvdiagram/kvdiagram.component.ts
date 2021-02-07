@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import {Tile} from '../bool-table/bool-table.component';
 import {EvaluatedFormula, InterpreterService} from '../interpreter.service';
+
+
+export interface Tile {
+  color: string;
+  index: string;
+  value: string;
+}
 
 @Component({
   selector: 'app-kvdiagram',
@@ -43,10 +49,13 @@ if (i !== 0){
 
   private GenerateTiles(evaluatedFormula: EvaluatedFormula): void{
 
+    // calculate how many flips of the table are needed
     const amountOfFlips = Math.log2(evaluatedFormula.possibilityList.length);
+    // dimensions of kv-diagram
     const colNumber = this.columnCount;
     const rowNumber = evaluatedFormula.possibilityList.length / colNumber;
 
+    // init grid for kv-diagram
     const tileGrid = [];
     for (let i = 0; i < rowNumber; i++){
       tileGrid[i] = [];
@@ -56,13 +65,18 @@ if (i !== 0){
 
     let currentFlip = 1;
 
+    // do the following for each flip
     while (currentFlip < amountOfFlips + 1){
 
+      // calculate the underlying power of the flip (like, 2, 4, 8, 16,...)
       const flipPower = Math.pow(2, currentFlip - 1);
+      // calculate the position of the flip in the table
       const flipPos = Math.pow(2, Math.floor((currentFlip + 1) / 2) - 1);
 
+      // Differentiate between horizontal and vertical flips
       if (currentFlip % 2 === 1){
 
+        // lookup the mirrored cell and add itÄs amount to the flip power to get the filed
         for (let i = 0; i < flipPos; i++){
           for (let j = 0; j < flipPos; j++){
               tileGrid[j][i + flipPos] = tileGrid[j][flipPos - i - 1] + flipPower;
@@ -70,7 +84,7 @@ if (i !== 0){
         }
 
       } else {
-
+        // lookup the mirrored cell and add itÄs amount to the flip power to get the filed
         for (let i = 0; i < flipPos * 2; i++){
           for (let j = 0; j < flipPos; j++){
             tileGrid[j + flipPos][i] = tileGrid[flipPos - j - 1][i] + flipPower;
@@ -88,59 +102,13 @@ if (i !== 0){
     const tileList = [];
     for (let i = 0; i < rowNumber; i++){
       for (let j = 0; j < colNumber; j++){
-        tileList.push({text: tileGrid[i][j], cols: 3, rows: 1, color: 'lightblue'});
+        const newValue = evaluatedFormula.possibilityList[tileGrid[i][j]][evaluatedFormula.formulaString];
+        const color = newValue === '1' ? 'green' : 'red';
+        tileList.push({index: tileGrid[i][j], value: newValue, color});
       }
     }
 
     this.tiles = tileList;
-
-
-
-
   }
-
-  /*private printKV(): void {
-    //get formula tree
-    const possibilityList = this.calculate();
-    let numFields = possibilityList.length;
-    if (numFields == 4) {
-
-      for (let i = 0; i < numFields; i++) {
-        let color;
-        //set color for current tile
-        if(possibilityList[i][this.formControl.value] == 1) {
-          //green
-          color = '#4CAF50';
-        }
-        else {
-          //red
-          color = '#FF5252';
-        }
-
-        let fieldName = '';
-        //generate name for current tile
-        for (let j = 0; j < Math.sqrt(numFields); j ++) {
-          if (possibilityList[i][this.displayedColumns[j]] == 1) {
-            fieldName = fieldName + this.displayedColumns[j];
-          }
-          else {
-            fieldName = fieldName + '¬' + this.displayedColumns[j];
-          }
-        }
-        //create tiles
-        if (i < 2) {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
-          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
-        }
-        else {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
-          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
-        }
-
-      }
-    }
-
-
-  }*/
 
 }

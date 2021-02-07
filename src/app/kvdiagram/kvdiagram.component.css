@@ -1,0 +1,20 @@
+.containerDiv{
+  font-size: 16px;
+}
+
+
+.indexLabel{
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  font-size: 1em;
+}
+
+.valueLabel{
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  font-size: 2em;
+}
+
+
