@@ -4,7 +4,7 @@
   <mat-error *ngIf="formControl.invalid">{{getErrorMessage()}}</mat-error>
 </mat-form-field>
 
-<button mat-raised-button color="primary" (click)="calculate()">Calculate</button>
+<button mat-raised-button color="primary" (click)="calculate()" class="calculateButton">Calculate</button>
 &nbsp;&nbsp;&nbsp;
 <!--<button mat-raised-button color="primary" (click)="printKV()">KV</button>-->
 <button mat-stroked-button color="basic" (click)="updateInput('⊼')">⊼</button>
@@ -34,19 +34,50 @@
   <tr mat-row *matRowDef="let row; columns: displayedColumnsAll;"></tr>
 </table>
 
+<mat-accordion>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        How to enter a valid formula
+      </mat-panel-title>
+      <mat-panel-description>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <p>
+
+      Use the letters A-Z and a-z for the variables in your formula. Please note that uppercase and lowercase variables
+      (like "A" and "a") are considered as different variables. <br><br>
+
+      You can enter Operators by using the Buttons next to the input panel or type these codes for the different
+      operators:<br><br>
+
+      not:      ¬<br>
+      nand:     ⊼<br>
+      and:      ∧<br>
+      nor:      ⊽<br>
+      or:       ∨<br>
+      xor:      ⊻<br>
+      impr:     →<br>
+      impl:     ←<br>
+      equ:      ↔<br><br>
+
+      You can use round brackets to influence the priority of operations<br>
+      Without brackets the priority of operators is the following (from highest to lowest priority):<br>
+      ¬, ⊼, ∧, ⊽, ∨, ⊻, →, ←, ↔
 
 
 
 
 
-<!--<mat-grid-list cols="2" rowHeight="100px">
-  <mat-grid-tile
-    *ngFor="let tile of tiles"
-    [colspan]="tile.cols"
-    [rowspan]="tile.rows"
-    [style.background]="tile.color">
-    {{tile.text}}
-    <mat-label>Enter formula</mat-label>
-  </mat-grid-tile>
-</mat-grid-list>-->
+    </p>
+  </mat-expansion-panel>
+</mat-accordion>
+
+
+
+
+
+
+
+
 

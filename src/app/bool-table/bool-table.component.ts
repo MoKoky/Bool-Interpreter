@@ -19,13 +19,12 @@ export class BoolTableComponent {
   formControl = new FormControl('', [
     Validators.required,
     this.forbiddenNameValidator(),
-    this.removeSpaces()
+    this.convertOperators()
   ]);
 
   displayedColumns: string[] = [];
   displayedColumnsAll: string[] = [];
   dataSource = [];
-  tiles: Tile[] = [];
   formulaString = '';
 
   constructor(private interpreterService: InterpreterService) {
@@ -39,14 +38,23 @@ export class BoolTableComponent {
     };
   }
 
-  // Remove spaces from the input
-  private removeSpaces(): ValidatorFn {
+  private convertOperators(): ValidatorFn {
     return (c: AbstractControl): {[key: string]: any} | null => {
       if (c && c.value) {
-        const removedSpaces = c.value.split(' ').join('');
+
+        let newValue = c.value.replace(/nand/gi, '⊼');
+        newValue = newValue.replace(/and/gi, '∧');
+        newValue = newValue.replace(/nor/gi, '⊽');
+        newValue = newValue.replace(/xor/gi, '⊻');
+        newValue = newValue.replace(/or/gi, '∨');
+        newValue = newValue.replace(/impr/gi, '→');
+        newValue = newValue.replace(/impl/gi, '←');
+        newValue = newValue.replace(/equ/gi, '↔');
+        newValue = newValue.replace(/not/gi, '¬');
+
         // This check is needed. Otherwise the validator will update every frame to remove whitespaces!!!
-        if (removedSpaces !== c.value){
-          c.setValue(removedSpaces, {emitEvent: false});
+        if (newValue !== c.value){
+          c.setValue(newValue, {emitEvent: false});
         }
       }
       return null;
@@ -85,51 +93,6 @@ export class BoolTableComponent {
     currentInput = currentInput + symbol;
     this.formControl.setValue(currentInput);
   }
-
-
-  /*printKV(): void {
-    //get formula tree
-    const possibilityList = this.calculate();
-    let numFields = possibilityList.length;
-    if (numFields == 4) {
-
-      for (let i = 0; i < numFields; i++) {
-        let color;
-        //set color for current tile
-        if(possibilityList[i][this.formControl.value] == 1) {
-          //green
-          color = '#4CAF50';
-        }
-        else {
-          //red
-          color = '#FF5252';
-        }
-
-        let fieldName = '';
-        //generate name for current tile
-        for (let j = 0; j < Math.sqrt(numFields); j ++) {
-          if (possibilityList[i][this.displayedColumns[j]] == 1) {
-            fieldName = fieldName + this.displayedColumns[j];
-          }
-          else {
-            fieldName = fieldName + '¬' + this.displayedColumns[j];
-          }
-        }
-        //create tiles
-        if (i < 2) {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
-          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
-        }
-        else {
-          this.tiles[i] = {text: i.toString() + "    " + fieldName + "    ->   " +
-          possibilityList[i][this.formControl.value], cols: 1, rows: 1, color: color};
-        }
-
-      }
-    }
-
-
-  }*/
 
   // Return Error Messages for the formula input field
   public getErrorMessage(): string {

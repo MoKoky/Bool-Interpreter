@@ -13,12 +13,16 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatGridListModule} from '@angular/material/grid-list';
 import { NormalformComponent } from './normalform/normalform.component';
 import {MatCardModule} from '@angular/material/card';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatExpansionModule} from '@angular/material/expansion';
+import { KvdiagramComponent } from './kvdiagram/kvdiagram.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     BoolTableComponent,
-    NormalformComponent
+    NormalformComponent,
+    KvdiagramComponent
   ],
     imports: [
         BrowserModule,
@@ -30,7 +34,9 @@ import {MatCardModule} from '@angular/material/card';
         ReactiveFormsModule,
         MatGridListModule,
         MatTabsModule,
-        MatCardModule
+        MatCardModule,
+        MatToolbarModule,
+        MatExpansionModule
     ],
   providers: [],
   bootstrap: [AppComponent]

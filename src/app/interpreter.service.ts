@@ -66,6 +66,7 @@ export class InterpreterService {
   }
 
   public calculate(formula: string): any {
+    formula = formula.split(' ').join('');
     this.formulaString = formula;
     formula =  this.priorityOperators(formula);
     console.log('Applied priority: ' + formula);
@@ -83,6 +84,7 @@ export class InterpreterService {
 
   public checkIfFormulaIsValid(formula: string): boolean{
 
+    formula = formula.split(' ').join('');
     // check if brackets are correct
     let openClosedCount = 0;
     for (let i = 0; i < formula.length; i++){
@@ -114,14 +116,14 @@ export class InterpreterService {
 
       } else if (char === this.closeBracket){
 
-        if (lastChar === LastChar.Operator || lastChar === LastChar.OpenBracket){
+        if (lastChar === LastChar.Operator || lastChar === LastChar.OpenBracket || lastChar === LastChar.NotOperator){
           return false;
         }
         lastChar = LastChar.ClosedBracket;
 
       } else if (this.operatorPriorityList.indexOf(char) > -1){
 
-        if (lastChar === LastChar.Operator){
+        if (lastChar === LastChar.Operator || lastChar === LastChar.NotOperator){
           return false;
         }
         lastChar = LastChar.Operator;
@@ -133,9 +135,21 @@ export class InterpreterService {
         }
         lastChar = LastChar.Variable;
 
+      } else if (char.match(this.notOperator)){
+
+        if (lastChar === LastChar.Variable || lastChar === LastChar.ClosedBracket){
+          return false;
+        }
+        lastChar = LastChar.NotOperator;
+
       } else {
         return false;
       }
+
+    }
+
+    if (lastChar === LastChar.Operator || lastChar === LastChar.NotOperator || lastChar === LastChar.OpenBracket){
+      return false;
     }
 
     return true;
@@ -493,5 +507,6 @@ enum LastChar{
   OpenBracket,
   ClosedBracket,
   Variable,
-  Operator
+  Operator,
+  NotOperator
 }
