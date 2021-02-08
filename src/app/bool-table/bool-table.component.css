@@ -16,3 +16,8 @@ mat-expansion-panel{
 .calculateButton{
   margin-left: 10px;
 }
+
+/*This works only half good and could cause the index column to get pushed out of the table*/
+.cell{
+  padding-left: 10%;
+}

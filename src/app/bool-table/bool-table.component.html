@@ -20,14 +20,19 @@
 
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
-  <ng-container [matColumnDef]="formulaString" class="formulaColumn">
+  <ng-container [matColumnDef]="formulaString">
     <th mat-header-cell *matHeaderCellDef>{{formulaString}} </th>
     <td mat-cell *matCellDef="let element">{{element[formulaString]}} </td>
   </ng-container>
 
-  <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns" class="variableColumn">
+  <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
     <th mat-header-cell *matHeaderCellDef> {{column}} </th>
     <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="index">
+    <th mat-header-cell class="cell"  *matHeaderCellDef>Index</th>
+    <td mat-cell class="cell" *matCellDef="let element">{{element['index']}} </td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumnsAll"></tr>
@@ -65,7 +70,7 @@
       Without brackets the priority of operators is the following (from highest to lowest priority):<br>
       ¬, ⊼, ∧, ⊽, ∨, ⊻, →, ←, ↔<br><br>
 
-      <b>Please note that the current site can reliably support up to 8 different variables.
+      <b>Please note that the current site can reliably support up to 6 different variables.
         More variables could cause visual glitches.</b>
 
 

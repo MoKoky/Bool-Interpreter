@@ -10,6 +10,8 @@ export class NormalformComponent implements OnInit {
 
   public dnf;
   public knf;
+  public nandForm;
+  public norForm;
 
   constructor(private interpreterService: InterpreterService) { }
 
@@ -22,6 +24,8 @@ export class NormalformComponent implements OnInit {
   private updateView(): void{
     this.dnf = this.interpreterService.getDnf();
     this.knf = this.interpreterService.getKnf();
+    this.norForm = this.interpreterService.getNor();
+    this.nandForm = this.interpreterService.getNand();
   }
 
 }

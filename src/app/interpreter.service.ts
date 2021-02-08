@@ -48,6 +48,11 @@ export class InterpreterService {
   private dnf;
   private knf;
 
+  private norForm;
+  private nandForm;
+
+  private minMaxTerms;
+
   // Test formula
   // a∧b∨¬c↔(a∨b)∧¬c
 
@@ -65,6 +70,14 @@ export class InterpreterService {
     return this.knf;
   }
 
+  public getNand(): string{
+    return this.nandForm;
+  }
+
+  public getNor(): string{
+    return this.norForm;
+  }
+
   public calculate(formula: string): any {
     formula = formula.split(' ').join('');
     this.formulaString = formula;
@@ -77,7 +90,10 @@ export class InterpreterService {
     this.formulaTree = formulaTree;
     this.evaluateFormula();
 
+    this.minMaxTerms = this.calculateMinMaxTerm();
     this.calculateNormalforms();
+    this.NandFromDnf(this.dnf);
+    this.NorFromKnf(this.knf);
 
     this.formulaChangedEmitter.next();
   }
@@ -207,6 +223,8 @@ export class InterpreterService {
       } else {
         entry[formulaString] = '0';
       }
+
+      entry['index'] = i;
       // add the current case to the list of all cases
       possibilityList.push(entry);
     }
@@ -435,7 +453,7 @@ export class InterpreterService {
 
 
   private calculateNormalforms(): any{
-    const minMaxTerms = this.calculateMinMaxTerm();
+    const minMaxTerms = this.minMaxTerms;
 
     const minTerm = minMaxTerms.minTerms;
     const maxTerm = minMaxTerms.maxTerms;
@@ -499,6 +517,28 @@ export class InterpreterService {
       }
     }
     return {minTerms, maxTerms};
+  }
+
+  private NandFromDnf(dnf: string): void{
+    dnf = dnf.replace(/∨/gi, '⊼');
+    dnf = dnf.replace(/∧/gi, '⊼');
+
+    if (this.minMaxTerms.minTerms.length === 1){
+      dnf = dnf + '⊼' + dnf;
+    }
+
+    this.nandForm = dnf;
+  }
+
+  private NorFromKnf(knf: string): void{
+    knf = knf.replace(/∨/gi, '⊽');
+    knf = knf.replace(/∧/gi, '⊽');
+
+    if (this.minMaxTerms.maxTerms.length === 1){
+      knf = knf + '⊽' + knf;
+    }
+
+    this.norForm = knf;
   }
 
 }

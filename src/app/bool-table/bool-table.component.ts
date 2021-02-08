@@ -11,8 +11,8 @@ export class BoolTableComponent {
 
   formControl = new FormControl('', [
     Validators.required,
+    this.convertOperators(),
     this.forbiddenNameValidator(),
-    this.convertOperators()
   ]);
 
   displayedColumns: string[] = [];
@@ -64,13 +64,13 @@ export class BoolTableComponent {
     // Get Formula tree
     this.interpreterService.calculate(this.formControl.value);
     const evaluatedFormula = this.interpreterService.getEvaluatedFormula();
-
     this.dataSource = evaluatedFormula.possibilityList;
     this.formulaString = evaluatedFormula.formulaString;
     // evaluatedFormula.keys.push(evaluatedFormula.formulaString);
     this.displayedColumns = evaluatedFormula.keys;
     this.displayedColumnsAll = [...evaluatedFormula.keys];
     this.displayedColumnsAll.unshift(this.formulaString);
+    this.displayedColumnsAll.push('index');
 
     console.log(this.dataSource);
     console.log(this.formulaString);
@@ -89,7 +89,7 @@ export class BoolTableComponent {
 
   // Return Error Messages for the formula input field
   public getErrorMessage(): string {
-    if (this.formControl.hasError('requried')){
+    if (this.formControl.hasError('required')){
       return 'Please enter a formula';
     } else {
       return 'Enter a correct formula';
